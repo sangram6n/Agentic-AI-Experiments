@@ -1,0 +1,32 @@
+# Python virtual environments
+.venv/
+venv/
+ENV/
+
+# Environment files and secrets (all folders)
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+
+# Python bytecode and cache
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Google ADK local runtime files
+.adk/
+**/.adk/
+
+# Local database files
+*.sqlite3
+**/db/chroma/
+
+# UV lockfile (as requested)
+uv.lock
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
