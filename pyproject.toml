@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "google-adk>=2.8.0",
+    "ipykernel>=6.29.3,<7",
     "langchain>=1.4.0",
     "langchain-chroma>=1.1.0",
     "langchain-community>=0.4.2",
@@ -22,6 +23,7 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "rank-bm25>=0.2.2",
     "sentence-transformers>=6.1.0",
+    "spyder-kernels>=3.0.0,<3.1.0",
     "tavily-python>=0.8.1",
 ]
 

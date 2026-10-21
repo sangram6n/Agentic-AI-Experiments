@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ORMAS KNOWLEDGE BASE</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- KaTeX CSS for LaTeX Math Formulas (Local with CDN fallback) -->
+  <link rel="stylesheet" href="vendor/katex.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=2.0.2">
+  
+  <!-- Local Vendor Scripts (Instant Zero-Latency Loading) -->
+  <script src="vendor/katex.min.js"></script>
+  <script src="vendor/marked.min.js"></script>
+  
+  <!-- CDN Fallbacks in case vendor files aren't found -->
+  <script>
+    if (!window.katex) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"><\/script>');
+    }
+    if (!window.marked) {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">🏛️</div>
+        <div class="brand-info">
+          <h1>ORMAS</h1>
+          <span>KNOWLEDGE BASE</span>
+        </div>
+      </div>
+
+      <!-- Strategy Selector -->
+      <div class="sidebar-section">
+        <label class="section-label" for="strategySelect">RAG RETRIEVAL STRATEGY</label>
+        <select id="strategySelect" class="custom-select">
+          <option value="standard" selected>Standard (Balanced)</option>
+          <option value="comparative">Comparative (Data & Tables)</option>
+          <option value="context_rich">Context-Rich (Deep Provenance)</option>
+          <option value="concise">Concise (Executive Bullets)</option>
+        </select>
+        <div id="strategyDesc" class="strategy-desc">Balanced semantic retrieval with clear factual grounding.</div>
+      </div>
+
+      <!-- Top K Slider -->
+      <div class="sidebar-section">
+        <div class="slider-header">
+          <label class="section-label" for="topKSlider">TOP-K RETRIEVAL CHUNKS</label>
+          <span id="topKValue" class="slider-badge">4</span>
+        </div>
+        <input type="range" id="topKSlider" min="1" max="8" value="4" class="custom-slider">
+      </div>
+
+      <!-- Quick Questions -->
+      <div class="sidebar-section">
+        <label class="section-label">RECOMMENDED QUERIES</label>
+        <div class="quick-chips">
+          <button type="button" class="chip" onclick="handleQuerySubmit(this.getAttribute('data-query'))" data-query="GIVE STATUS OF SHAKTI GAON PROJECT">📊 Shakti Gaon Status Table</button>
+          <button type="button" class="chip" onclick="handleQuerySubmit(this.getAttribute('data-query'))" data-query="can you tell me in details about SFURTI">📑 SFURTI Clusters Table</button>
+          <button type="button" class="chip" onclick="handleQuerySubmit(this.getAttribute('data-query'))" data-query="what is attention">📐 Attention Formula</button>
+          <button type="button" class="chip" onclick="handleQuerySubmit(this.getAttribute('data-query'))" data-query="WHAT IS RAG">💡 What is RAG?</button>
+        </div>
+      </div>
+
+      <!-- Ingested Documents List -->
+      <div class="sidebar-section doc-section">
+        <div class="slider-header">
+          <label class="section-label">INGESTED DOCUMENTS</label>
+          <span id="docCountBadge" class="slider-badge">...</span>
+        </div>
+        <div id="docList" class="doc-list">
+          <div class="doc-loading">Connecting to repository...</div>
+        </div>
+      </div>
+
+      <!-- Health Status Indicator -->
+      <div class="system-status">
+        <span class="status-dot online"></span>
+        <span id="systemStatusText">Connected to Ollama + Groq</span>
+      </div>
+    </aside>
+
+    <!-- Main Chat Window -->
+    <main class="chat-container">
+      <header class="chat-header">
+        <div class="header-title">
+          <h2>ORMAS Intelligence Assistant</h2>
+          <p>Grounded strictly in institutional documents & presentations</p>
+        </div>
+        <div class="header-actions">
+          <button type="button" id="clearChatBtn" onclick="clearChatHistory()" class="btn-secondary" title="Clear conversation">🗑️ Clear Chat</button>
+        </div>
+      </header>
+
+      <!-- Message History -->
+      <section id="chatMessages" class="chat-messages">
+        <div class="message bot welcome-card">
+          <div class="msg-avatar">🏛️</div>
+          <div class="msg-content">
+            <h3>Welcome to ORMAS Knowledge Base</h3>
+            <p>I can help you navigate institutional documents, project review tables, and technical blueprints with rich mathematical and tabular rendering.</p>
+            <div class="feature-pills">
+              <span>📊 Full Markdown Tables</span>
+              <span>📐 LaTeX Math Formulas</span>
+              <span>📑 Exact Citations & Provenance</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Input Bar -->
+      <footer class="chat-input-wrapper">
+        <form id="chatForm" class="chat-input-box" onsubmit="event.preventDefault(); handleQuerySubmit(); return false;">
+          <textarea id="queryInput" placeholder="Ask anything about your documents (e.g. Status of SFURTI or Shakti Gaon)..." rows="1" onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); handleQuerySubmit(); }"></textarea>
+          <button type="button" id="sendBtn" onclick="handleQuerySubmit();" class="btn-send" title="Send Query">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z"/>
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Client JavaScript with Cache-Buster -->
+  <script src="app.js?v=20261019_04"></script>
+</body>
+</html>

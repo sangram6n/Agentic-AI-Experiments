@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 load_dotenv()
 os.environ["OPENROUTER_API_KEY"] = os.getenv("OPENROUTER_API_KEY")
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+
 def get_weather(city: str) -> dict:
     """Retrieves the current weather report for a specified city.
 
