@@ -1,8 +1,6 @@
-
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
-
 
 # =====================================================
 # 1. CREATE AN ILLUSTRATIVE DOCUMENT COLLECTION
@@ -59,6 +57,7 @@ for topic, description in topics.items():
 
 print("Total documents:", len(documents))
 
+documents[:15]
 
 # =====================================================
 # 2. CREATE EMBEDDINGS
@@ -179,7 +178,7 @@ query_vector = model.encode(
 query_vector = np.ascontiguousarray(query_vector)
 
 k = 5
-
+hnsw_index.search(query_vector,3)
 exact_results = search(exact_index, query_vector, k)
 ivf_results = search(ivf_index, query_vector, k)
 hnsw_results = search(hnsw_index, query_vector, k)
@@ -226,3 +225,5 @@ for nprobe in [1, 2, 4, nlist]:
         f"nprobe={nprobe:2d} | "
         f"Recall@{k}={recall:.2f}"
     )
+
+import matplotlib.pyplot as plt
