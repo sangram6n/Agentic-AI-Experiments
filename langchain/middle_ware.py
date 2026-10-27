@@ -53,4 +53,51 @@ for q in questions:
     print(f"messages: {response}")
     print(f"lenthn of messages is : {len(response["messages"])}")
 
+###token size based middle ware
+from langchain.tools import tool
+
+@tool
+def search_hotels(city: str) -> str:
+    """Search hotels - returns long response to use more tokens."""
+    return f"""Hotels in {city}:
+    1. Grand Hotel - 5 star, $350/night, spa, pool, gym
+    2. City Inn - 4 star, $180/night, business center
+    3. Budget Stay - 3 star, $75/night, free wifi"""
+
+agent = create_agent(
+    model = groq_model,
+    tools=[search_hotels],
+    checkpointer= InMemorySaver(),
+    middleware=[SummarizationMiddleware(
+        model=groq_model,
+        trigger= ("tokens",550),
+        keep= ("tokens",250)
+    )]
+)
+
+config = {"configurable":{
+    "thread_id":"test-2"
+}}
+
+def token_counter(messges:str)->int:
+    total_char = sum([len(str(m.content)) for m in messges])
+    return total_char//4 #approximately 4 cchar is eqal to 1 token
+
+
+# Run test
+cities = ["Paris", "London", "Tokyo", "New York", "Dubai", "Singapore"]
+
+for city in cities:
+    response = agent.invoke(
+        {"messages": [HumanMessage(content=f"Find hotels in {city}")]},
+        config=config
+    )
     
+    tokens = token_counter(response["messages"])
+    print(f"{city}: ~{tokens} tokens, {len(response['messages'])} messages")
+    print(f"{(response['messages'])}")
+
+
+
+
+
