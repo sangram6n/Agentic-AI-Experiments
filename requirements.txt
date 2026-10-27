@@ -19,3 +19,4 @@ rank-bm25
 ipykernel>=6.29.3,<7
 spyder-kernels>=3.0.0,<3.1.0
 faiss-cpu
+spyder-kernels>=3.0.0,<3.1.0

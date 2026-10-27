@@ -26,6 +26,7 @@ llm = init_chat_model(
     model_provider= "groq"
 )
 TOP_K = 3
+llm.invoke("hi")
 
 # These are illustrative training documents, not official data.
 source_documents = [
@@ -69,12 +70,7 @@ source_documents = [
 # =====================================================
 
 embeddings = HuggingFaceEmbeddings(
-    model_name=EMBEDDING_MODEL
-)
-
-llm = ChatOllama(
-    model=OLLAMA_MODEL,
-    temperature=0,
+    model_name= EMBEDDING_MODEL
 )
 
 
@@ -155,6 +151,7 @@ source_text_by_name = {
     doc.metadata["source"]: doc.page_content
     for doc in source_documents
 }
+
 
 contextualized_chunks = []
 
