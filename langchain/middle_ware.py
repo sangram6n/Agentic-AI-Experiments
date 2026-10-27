@@ -97,7 +97,60 @@ for city in cities:
     print(f"{city}: ~{tokens} tokens, {len(response['messages'])} messages")
     print(f"{(response['messages'])}")
 
+import langchain
+from langchain.agents.middleware import SummarizationMiddleware
+from langchain.agents import create_agent
+from langchain.messages import SystemMessage,AIMessage,HumanMessage
+from langchain.chat_models import init_chat_model
+import os
+from dotenv import load_dotenv
+from langchain.tools import tool
+from langgraph.checkpoint.memory import InMemorySaver
+
+load_dotenv()
+
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+
+
+groq_model = init_chat_model(
+    model = "openai/gpt-oss-20b",
+    model_provider="groq"
+)
+
+groq_model.invoke("hi")
 
 
 
+agent = create_agent(
+    model=groq_model,
+    middleware= [
+        SummarizationMiddleware(
+            model= groq_model,
+            trigger= ("messages",10),
+            keep= ("messages",5)
+        )
+    ],
+    checkpointer= InMemorySaver()
+)
 
+config = {"configurable":{"thread_id":"test-1"}}
+
+questions = [
+    "what is attention"
+]
+
+
+# Alternative test data
+questions = [
+    "What is 2+2?",
+    "What is 10*5?",
+    "What is 100/4?",
+    "What is 15-7?",
+    "What is 3*3?",
+    "What is 4*4?",
+]
+
+for q in questions:
+    response = agent.invoke({"messages":[HumanMessage(content=q)]},config=config)
+    print(f"messages: {response}")
+    print(f"lenthn of messages is : {len(response["messages"])}")

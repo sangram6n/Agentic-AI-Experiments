@@ -56,9 +56,6 @@ for topic, description in topics.items():
             })
 
 print("Total documents:", len(documents))
-
-documents[:15]
-
 # =====================================================
 # 2. CREATE EMBEDDINGS
 # =====================================================
