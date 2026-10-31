@@ -94,21 +94,6 @@ result["messages"][-1].content
 
 result["__interrupt__"]
 
-if "__interrupt__" in result:
-    print("wait approving mail")
-    result = agent1.invoke(
-        Command(
-            resume= {
-                "decisions": [{"type": "approve"}]}
-        ),
-        config=config
-    )
-
-
-
-result["messages"][-1].content
-
-
 
 
 

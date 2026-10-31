@@ -154,3 +154,113 @@ for q in questions:
     response = agent.invoke({"messages":[HumanMessage(content=q)]},config=config)
     print(f"messages: {response}")
     print(f"lenthn of messages is : {len(response["messages"])}")
+
+
+import langchain
+from langchain.agents.middleware import HumanInTheLoopMiddleware
+from langchain.messages import AIMessage,HumanMessage,SystemMessage
+from langgraph.checkpoint.memory import InMemorySaver
+from langchain_groq import ChatGroq
+import os
+from dotenv import load_dotenv
+from langgraph.types import Command
+from langchain.agents import create_agent
+from langchain.tools import tool
+from langchain.chat_models import init_chat_model
+
+
+
+load_dotenv()
+os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+
+# groq_model = ChatGroq(
+#     model = "openai/gpt-oss-20b"
+# )
+
+groq_model = init_chat_model(
+    model = "openai/gpt-oss-20b",
+    model_provider="groq"
+)
+
+
+groq_model.invoke("hi")
+
+
+@tool
+def read_email_tool(email_id: str) -> str:
+    """Mock function to read an email by its ID."""
+    return f"Email content for ID: {email_id}"
+@tool
+def send_email_tool(recipient: str, subject: str, body: str) -> str:
+    """Mock function to send an email."""
+    return f"Email sent to {recipient} with subject '{subject}'"
+
+agent = create_agent(
+    model=groq_model,
+    tools = [send_email_tool,read_email_tool],
+    middleware= [
+        HumanInTheLoopMiddleware(
+            interrupt_on= {
+                "send_email_tool": {
+                    "allowed_decisions" :["approve","edit","reject"]
+                },
+            "read_email_tool":False}
+        )
+    ],
+    checkpointer= InMemorySaver(),
+    system_prompt=(
+        "You are a helpful assistant. Once a tool has been executed and returns "
+        "a confirmation, the user's request is complete. Even if a human reviewer "
+        "edited the tool arguments (such as changing the subject or body), do NOT "
+        "call the tool again—simply confirm the action to the user.")
+
+)
+import uuid
+
+# Generate a fresh thread_id so previous messages don't pollute the state
+config = {"configurable": {"thread_id": f"test-{uuid.uuid4()}"}}
+
+
+
+
+response = agent.invoke(
+    {
+        "messages":[HumanMessage(
+            content=  "send emal to sangu5n@gmail.com with subject hi and content helo")]
+    },
+    config = config
+)
+
+if "__interrupt__" in response:
+    response = agent.invoke(
+        Command(
+            resume= {
+                "decisions" : [{
+                    "type":"edit",
+                    "edited_action":{
+                        "name": "send_email_tool",
+                        "args":{
+                            "recipient":"nngu5n@gmail.com",
+                            "subject":"hi sangu",
+                            "body":"hello are you fine " }
+                    }
+                }
+                ]
+            }
+        ),
+        config=config
+    )
+
+
+response["messages"][-1].content
+# Fix typo: 'responses' -> 'response'
+print("Final AI Response:")
+print(response["messages"][-1].content)
+
+print("\n--- Full Message History Inspection ---")
+for i, msg in enumerate(response["messages"]):
+    print(f"[{i}] {msg.__class__.__name__}:")
+    if getattr(msg, "tool_calls", None):
+        print(f"    Tool Calls: {msg.tool_calls}")
+    if msg.content:
+        print(f"    Content: {msg.content}")
